@@ -27,13 +27,15 @@ OLLAMA_ENDPOINT = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
 
 # LLM provider: a hosted API when its key is set (Gemini, then Groq), otherwise local Ollama
 if os.environ.get("GEMINI_API_KEY"):
-    from llm import GEMINI_BASE_URL, OpenAICompatClient, pick_latest_flash
+    from llm import GEMINI_BASE_URL, OpenAICompatClient, flash_models, pick_latest_flash
 
     LLM_PROVIDER = "gemini"
     LLM_ENDPOINT = "Gemini API"
     inference_client = OpenAICompatClient(os.environ["GEMINI_API_KEY"], GEMINI_BASE_URL, "Gemini")
     # Google retires model versions, so default to the newest Flash model the key can use
     DEFAULT_MODEL = os.environ.get("GEMINI_MODEL") or pick_latest_flash(inference_client, "gemini-2.5-flash")
+    # When that model is overloaded, fall back to the other Flash models (newest first, lite last)
+    inference_client.fallback_models = flash_models(inference_client)[:4]
 elif os.environ.get("GROQ_API_KEY"):
     from llm import GROQ_BASE_URL, OpenAICompatClient
 

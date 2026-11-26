@@ -144,3 +144,24 @@ def test_pick_latest_flash_prefers_newest_stable():
 
     assert pick_latest_flash(Lister(), "fallback") == "gemini-3.8-flash"
     assert pick_latest_flash(Broken(), "fallback") == "fallback"
+
+
+def test_client_falls_back_when_model_overloaded(monkeypatch):
+    import httpx
+    import llm
+
+    calls = []
+
+    def handler(request):
+        model = json.loads(request.content)["model"]
+        calls.append(model)
+        if model == "busy-model":
+            return httpx.Response(503, json={"error": "high demand"})
+        return httpx.Response(200, json={"choices": [{"message": {"content": "ok"}}]})
+
+    monkeypatch.setattr(llm.time, "sleep", lambda s: None)
+    client = llm.OpenAICompatClient("k", "https://example.test/v1", "Test")
+    client._http = httpx.Client(base_url="https://example.test/v1/", transport=httpx.MockTransport(handler))
+    client.fallback_models = ["busy-model", "spare-model"]
+    assert client.chat("busy-model", [{"role": "user", "content": "hi"}])["message"]["content"] == "ok"
+    assert calls == ["busy-model", "busy-model", "spare-model"]
