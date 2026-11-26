@@ -23,10 +23,11 @@ RETRYABLE = {429, 500, 502, 503, 504}
 
 
 class OpenAICompatClient:
-    def __init__(self, api_key: str, base_url: str, label: str, timeout: float = 120.0) -> None:
+    def __init__(self, api_key: str, base_url: str, label: str, timeout: float = 45.0) -> None:
         self.label = label
         # Models tried, in order, when the requested one is overloaded or unavailable
         self.fallback_models: List[str] = []
+        self.last_model = ""
         self._http = httpx.Client(
             base_url=base_url.rstrip("/") + "/",
             headers={"Authorization": f"Bearer {api_key}"},
@@ -49,6 +50,7 @@ class OpenAICompatClient:
                     last_error = f"{candidate} timed out"
                     break  # try the next model
                 if res.status_code < 400:
+                    self.last_model = candidate
                     return {"message": {"content": res.json()["choices"][0]["message"]["content"]}}
                 last_error = f"{self.label} API error {res.status_code} ({candidate}): {res.text[:200]}"
                 if res.status_code == 404:

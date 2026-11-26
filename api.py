@@ -168,6 +168,8 @@ def status():
         "llmEndpoint": LLM_ENDPOINT,
         "ollama": _ollama_ok(),
         "graphStore": True,
+        "fallbackModels": getattr(inference_client, "fallback_models", []),
+        "lastModel": getattr(inference_client, "last_model", ""),
     }
 
 
