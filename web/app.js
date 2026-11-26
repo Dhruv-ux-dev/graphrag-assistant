@@ -85,7 +85,7 @@ function setStatus(status, waking) {
     $('set-store').textContent = 'In-memory (snapshot)';
     return;
   }
-  const llmName = status.provider === 'groq' ? 'Groq' : 'Ollama';
+  const llmName = { groq: 'Groq', gemini: 'Gemini' }[status.provider] || 'Ollama';
   $('st-llm').previousElementSibling.textContent = `LLM (${llmName})`;
   set('st-llm', status.ollama ? 'Running' : 'Offline', status.ollama ? 'ok' : 'off');
   set('st-store', status.store === 'neo4j' ? 'Neo4j' : 'In-memory', 'ok');

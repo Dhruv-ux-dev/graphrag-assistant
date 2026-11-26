@@ -25,14 +25,21 @@ from ollama import Client as OllamaClient
 # Connection endpoint and default model for the local Ollama inference engine
 OLLAMA_ENDPOINT = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
 
-# LLM provider: Groq's hosted API when GROQ_API_KEY is set, otherwise local Ollama
-if os.environ.get("GROQ_API_KEY"):
-    from llm import GroqClient
+# LLM provider: a hosted API when its key is set (Gemini, then Groq), otherwise local Ollama
+if os.environ.get("GEMINI_API_KEY"):
+    from llm import GEMINI_BASE_URL, OpenAICompatClient
+
+    LLM_PROVIDER = "gemini"
+    DEFAULT_MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
+    LLM_ENDPOINT = "Gemini API"
+    inference_client = OpenAICompatClient(os.environ["GEMINI_API_KEY"], GEMINI_BASE_URL, "Gemini")
+elif os.environ.get("GROQ_API_KEY"):
+    from llm import GROQ_BASE_URL, OpenAICompatClient
 
     LLM_PROVIDER = "groq"
     DEFAULT_MODEL = os.environ.get("GROQ_MODEL", "llama-3.3-70b-versatile")
     LLM_ENDPOINT = "Groq API"
-    inference_client = GroqClient(os.environ["GROQ_API_KEY"])
+    inference_client = OpenAICompatClient(os.environ["GROQ_API_KEY"], GROQ_BASE_URL, "Groq")
 else:
     LLM_PROVIDER = "ollama"
     DEFAULT_MODEL = os.environ.get("OLLAMA_MODEL", "llama3.2")
@@ -531,7 +538,11 @@ def parse_graph_elements_via_llm(
             f"Could not reach the LLM ({LLM_ENDPOINT}) with model '{model_name}': {exc}"
         ) from exc
 
-    raw = completion["message"]["content"]
+    raw = completion["message"]["content"] or ""
+    # Some hosted models wrap JSON in a Markdown code fence
+    fenced = re.match(r"^\s*```(?:json)?\s*(.*?)\s*```\s*$", raw, re.S)
+    if fenced:
+        raw = fenced.group(1)
     try:
         parsed = json.loads(raw)
     except (TypeError, json.JSONDecodeError) as exc:

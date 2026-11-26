@@ -111,14 +111,14 @@ ollama pull llama3.2
 uvicorn api:app --port 8000        # then open http://localhost:8000
 ```
 
-To use Groq's hosted models instead of Ollama, set `GROQ_API_KEY` (and optionally `GROQ_MODEL`,
-default `llama-3.3-70b-versatile`). The API server only needs `requirements-api.txt`.
+To use a hosted model instead of Ollama, set `GEMINI_API_KEY` (optional `GEMINI_MODEL`, default
+`gemini-2.5-flash`) or `GROQ_API_KEY` (optional `GROQ_MODEL`, default `llama-3.3-70b-versatile`). The API server only needs `requirements-api.txt`.
 
 Without `NEO4J_URI` the server keeps the graph in memory (`memory_store.py`), so only Ollama is
 needed. Set `NEO4J_URI`, `NEO4J_USER` and `NEO4J_PASSWORD` to use Neo4j instead.
 
 The [live demo](https://dhruv-ux-dev.github.io/graphrag-assistant/) is the same UI served from GitHub
-Pages, talking to the API hosted on Render with Groq (set in `web/config.js`). While that free server
+Pages, talking to the API hosted on Render with Gemini (set in `web/config.js`). While that free server
 wakes up, or if it is unavailable, the page shows `web/demo-data.json`, a snapshot of a real run with
 `llama3.2` on the sample documents, and can replay the sample questions. Regenerate it with
 `python export_demo.py`.

@@ -212,3 +212,9 @@ def test_neighbors_are_deduplicated_across_entry_nodes(llm):
     entries, _ = app.collect_graph_context("CloudEngine and Dhruv Mittal", store)
     assert sorted(e["name"] for e in entries) == ["CloudEngine", "Dhruv Mittal"]
     assert all(e["hops"] == 0 for e in entries)
+
+
+def test_extraction_accepts_fenced_json(llm):
+    llm.extraction = "```json\n" + json.dumps({"nodes": [{"name": "CloudEngine", "type": "PRODUCT", "summary": "x"}], "edges": []}) + "\n```"
+    nodes, _ = app.parse_graph_elements_via_llm(DOC, "Spec")
+    assert [n.display_name for n in nodes] == ["CloudEngine"]
