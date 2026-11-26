@@ -1,0 +1,590 @@
+{
+ "meta": {
+  "model": "llama3.2",
+  "generatedAt": "2026-11-21T22:10:13.496568+00:00"
+ },
+ "overview": {
+  "stats": {
+   "documents": 5,
+   "entities": 18,
+   "relationships": 21,
+   "citationValidity": 100.0
+  },
+  "documents": [
+   {
+    "name": "CloudEngine Specification",
+    "text": "CloudEngine is an automated deployment framework designed by Knowledge Graph Labs. It uses generative configuration templates to provision server clusters. The system was architected by Dhruv Mittal, who led the development team in San Francisco. CloudEngine integrates with Neo4j to build network dependency graphs, preventing routing circularity.",
+    "words": 47,
+    "ingestedAt": null,
+    "entities": 4,
+    "relationships": 4
+   },
+   {
+    "name": "Knowledge Graph Venture Overview",
+    "text": "Knowledge Graph Labs was established in 2022 to build developer workflow tools. The venture is backed by TechCapital Partners, who led a $10 million Series A round. Their core product is CodeSync, a cloud synchronizer. CodeSync's team includes engineers previously at AWS and Microsoft, working under the technical leadership of Dhruv Mittal.",
+    "words": 52,
+    "ingestedAt": null,
+    "entities": 6,
+    "relationships": 5
+   },
+   {
+    "name": "Project Orion Brief",
+    "text": "Project Orion is a data platform being built by Knowledge Graph Labs for Meridian Health. Priya Raman leads the Orion engineering team and reports to Dhruv Mittal. Amit Verma works on Orion's ingestion pipeline, which runs on Apache Kafka. The project is delivered from the company's Bengaluru office.",
+    "words": 48,
+    "ingestedAt": null,
+    "entities": 7,
+    "relationships": 4
+   },
+   {
+    "name": "Meridian Health Partnership",
+    "text": "Meridian Health is a hospital network headquartered in Singapore. In 2024 Meridian Health signed a three-year partnership with Knowledge Graph Labs to modernise its patient records. The agreement covers Project Orion and a CodeSync licence for Meridian's internal developers.",
+    "words": 39,
+    "ingestedAt": null,
+    "entities": 4,
+    "relationships": 3
+   },
+   {
+    "name": "Team Directory",
+    "text": "Priya Raman joined Knowledge Graph Labs in 2023 after working at Google. Amit Verma is a data engineer who previously built streaming systems at Flipkart. Both are based in Bengaluru. Sara Lee manages partnerships at TechCapital Partners and sits on the Knowledge Graph Labs board.",
+    "words": 45,
+    "ingestedAt": null,
+    "entities": 8,
+    "relationships": 5
+   }
+  ],
+  "graph": {
+   "nodes": [
+    {
+     "id": "585f9eb81ab2",
+     "name": "CloudEngine",
+     "type": "PRODUCT",
+     "summary": "CloudEngine is an automated deployment framework",
+     "documents": [
+      "CloudEngine Specification"
+     ]
+    },
+    {
+     "id": "cec26e637e08",
+     "name": "Knowledge Graph Labs",
+     "type": "ORGANIZATION",
+     "summary": "Knowledge Graph Labs designed CloudEngine",
+     "documents": [
+      "CloudEngine Specification",
+      "Knowledge Graph Venture Overview",
+      "Project Orion Brief",
+      "Meridian Health Partnership",
+      "Team Directory"
+     ]
+    },
+    {
+     "id": "0ebd3ce00ddd",
+     "name": "Dhruv Mittal",
+     "type": "PERSON",
+     "summary": "Dhruv Mittal led the development team of CloudEngine",
+     "documents": [
+      "CloudEngine Specification",
+      "Knowledge Graph Venture Overview",
+      "Project Orion Brief"
+     ]
+    },
+    {
+     "id": "767ec6342382",
+     "name": "Neo4j",
+     "type": "TECHNOLOGY",
+     "summary": "Neo4j is used by CloudEngine to build network dependency graphs",
+     "documents": [
+      "CloudEngine Specification"
+     ]
+    },
+    {
+     "id": "e00974e37ec1",
+     "name": "TechCapital Partners",
+     "type": "ORGANIZATION",
+     "summary": "A venture capital firm that backed Knowledge Graph Labs",
+     "documents": [
+      "Knowledge Graph Venture Overview",
+      "Team Directory"
+     ]
+    },
+    {
+     "id": "ac68bbf921d9",
+     "name": "AWS",
+     "type": "ORGANIZATION",
+     "summary": "A technology company that some of Knowledge Graph Labs' engineers previously worked for",
+     "documents": [
+      "Knowledge Graph Venture Overview"
+     ]
+    },
+    {
+     "id": "5f532a3fc4f1",
+     "name": "Microsoft",
+     "type": "ORGANIZATION",
+     "summary": "A technology company that some of Knowledge Graph Labs' engineers previously worked for",
+     "documents": [
+      "Knowledge Graph Venture Overview"
+     ]
+    },
+    {
+     "id": "77c1a04116b6",
+     "name": "CodeSync",
+     "type": "PRODUCT",
+     "summary": "A cloud synchronizer developed by Knowledge Graph Labs",
+     "documents": [
+      "Knowledge Graph Venture Overview",
+      "Meridian Health Partnership"
+     ]
+    },
+    {
+     "id": "41610ff83aee",
+     "name": "Meridian Health",
+     "type": "ORGANIZATION",
+     "summary": "A healthcare organization partnering with Knowledge Graph Labs",
+     "documents": [
+      "Project Orion Brief",
+      "Meridian Health Partnership"
+     ]
+    },
+    {
+     "id": "a63918d01edf",
+     "name": "Priya Raman",
+     "type": "PERSON",
+     "summary": "Leads the Orion engineering team",
+     "documents": [
+      "Project Orion Brief",
+      "Team Directory"
+     ]
+    },
+    {
+     "id": "520cedd6e1a9",
+     "name": "Amit Verma",
+     "type": "PERSON",
+     "summary": "Works on Orion's ingestion pipeline",
+     "documents": [
+      "Project Orion Brief",
+      "Team Directory"
+     ]
+    },
+    {
+     "id": "10c24bdcf733",
+     "name": "Apache Kafka",
+     "type": "TECHNOLOGY",
+     "summary": "Used by Orion's ingestion pipeline",
+     "documents": [
+      "Project Orion Brief"
+     ]
+    },
+    {
+     "id": "7590e7ac30cf",
+     "name": "Bengaluru office",
+     "type": "LOCATION",
+     "summary": "The location where Orion is delivered from",
+     "documents": [
+      "Project Orion Brief"
+     ]
+    },
+    {
+     "id": "c269daaf52f6",
+     "name": "Project Orion",
+     "type": "PRODUCT",
+     "summary": "A system used by Meridian Health for modernisation",
+     "documents": [
+      "Meridian Health Partnership"
+     ]
+    },
+    {
+     "id": "d879e0141ae4",
+     "name": "Sara Lee",
+     "type": "PERSON",
+     "summary": "Manages partnerships at TechCapital Partners",
+     "documents": [
+      "Team Directory"
+     ]
+    },
+    {
+     "id": "c822c1b63853",
+     "name": "Google",
+     "type": "ORGANIZATION",
+     "summary": "Company where Priya Raman previously worked",
+     "documents": [
+      "Team Directory"
+     ]
+    },
+    {
+     "id": "5972793cc171",
+     "name": "Flipkart",
+     "type": "ORGANIZATION",
+     "summary": "Company where Amit Verma previously worked",
+     "documents": [
+      "Team Directory"
+     ]
+    },
+    {
+     "id": "9aa8c9aa3273",
+     "name": "Bengaluru",
+     "type": "LOCATION",
+     "summary": "City where Priya Raman and Amit Verma are based",
+     "documents": [
+      "Team Directory"
+     ]
+    }
+   ],
+   "edges": [
+    {
+     "source": "585f9eb81ab2",
+     "target": "cec26e637e08",
+     "type": "DEVELOPED",
+     "context": "designed by",
+     "documents": [
+      "CloudEngine Specification"
+     ]
+    },
+    {
+     "source": "585f9eb81ab2",
+     "target": "0ebd3ce00ddd",
+     "type": "WORKS_FOR",
+     "context": "led the development team",
+     "documents": [
+      "CloudEngine Specification"
+     ]
+    },
+    {
+     "source": "585f9eb81ab2",
+     "target": "767ec6342382",
+     "type": "INTEGRATES_WITH",
+     "context": "builds network dependency graphs",
+     "documents": [
+      "CloudEngine Specification"
+     ]
+    },
+    {
+     "source": "0ebd3ce00ddd",
+     "target": "585f9eb81ab2",
+     "type": "DEVELOPED",
+     "context": "led the development team",
+     "documents": [
+      "CloudEngine Specification"
+     ]
+    },
+    {
+     "source": "e00974e37ec1",
+     "target": "cec26e637e08",
+     "type": "DEVELOPED",
+     "context": "backed",
+     "documents": [
+      "Knowledge Graph Venture Overview"
+     ]
+    },
+    {
+     "source": "cec26e637e08",
+     "target": "77c1a04116b6",
+     "type": "DEVELOPED",
+     "context": "core product",
+     "documents": [
+      "Knowledge Graph Venture Overview"
+     ]
+    },
+    {
+     "source": "77c1a04116b6",
+     "target": "0ebd3ce00ddd",
+     "type": "WORKS_FOR",
+     "context": "team leader",
+     "documents": [
+      "Knowledge Graph Venture Overview"
+     ]
+    },
+    {
+     "source": "0ebd3ce00ddd",
+     "target": "ac68bbf921d9",
+     "type": "PREVIOUSLY_WORKED_FOR",
+     "context": "engineers",
+     "documents": [
+      "Knowledge Graph Venture Overview"
+     ]
+    },
+    {
+     "source": "0ebd3ce00ddd",
+     "target": "5f532a3fc4f1",
+     "type": "PREVIOUSLY_WORKED_FOR",
+     "context": "engineers",
+     "documents": [
+      "Knowledge Graph Venture Overview"
+     ]
+    },
+    {
+     "source": "cec26e637e08",
+     "target": "41610ff83aee",
+     "type": "PARTNERS_WITH",
+     "context": "Partnering with Meridian Health",
+     "documents": [
+      "Project Orion Brief"
+     ]
+    },
+    {
+     "source": "a63918d01edf",
+     "target": "0ebd3ce00ddd",
+     "type": "REPORTS_TO",
+     "context": "Supervisor of",
+     "documents": [
+      "Project Orion Brief"
+     ]
+    },
+    {
+     "source": "520cedd6e1a9",
+     "target": "cec26e637e08",
+     "type": "WORKS_FOR",
+     "context": "Employed by",
+     "documents": [
+      "Project Orion Brief"
+     ]
+    },
+    {
+     "source": "cec26e637e08",
+     "target": "7590e7ac30cf",
+     "type": "LOCATED_IN",
+     "context": "Headquartered in",
+     "documents": [
+      "Project Orion Brief"
+     ]
+    },
+    {
+     "source": "41610ff83aee",
+     "target": "cec26e637e08",
+     "type": "DEVELOPED",
+     "context": "modernise its patient records",
+     "documents": [
+      "Meridian Health Partnership"
+     ]
+    },
+    {
+     "source": "41610ff83aee",
+     "target": "c269daaf52f6",
+     "type": "WORKS_FOR",
+     "context": "agreement covers",
+     "documents": [
+      "Meridian Health Partnership"
+     ]
+    },
+    {
+     "source": "41610ff83aee",
+     "target": "77c1a04116b6",
+     "type": "WORKS_FOR",
+     "context": "agreement covers",
+     "documents": [
+      "Meridian Health Partnership"
+     ]
+    },
+    {
+     "source": "a63918d01edf",
+     "target": "cec26e637e08",
+     "type": "WORKS_FOR",
+     "context": "joined",
+     "documents": [
+      "Team Directory"
+     ]
+    },
+    {
+     "source": "520cedd6e1a9",
+     "target": "5972793cc171",
+     "type": "WORKED_FOR",
+     "context": "built",
+     "documents": [
+      "Team Directory"
+     ]
+    },
+    {
+     "source": "d879e0141ae4",
+     "target": "e00974e37ec1",
+     "type": "WORKS_FOR",
+     "context": "manages",
+     "documents": [
+      "Team Directory"
+     ]
+    },
+    {
+     "source": "a63918d01edf",
+     "target": "9aa8c9aa3273",
+     "type": "LOCATED_IN",
+     "context": "based",
+     "documents": [
+      "Team Directory"
+     ]
+    },
+    {
+     "source": "520cedd6e1a9",
+     "target": "9aa8c9aa3273",
+     "type": "LOCATED_IN",
+     "context": "based",
+     "documents": [
+      "Team Directory"
+     ]
+    }
+   ]
+  },
+  "samples": [
+   "Which investor backs Knowledge Graph Labs and who sits on its board?",
+   "What does the Meridian Health partnership cover?"
+  ],
+  "templates": {
+   "CloudEngine Specification": "CloudEngine is an automated deployment framework designed by Knowledge Graph Labs. It uses generative configuration templates to provision server clusters. The system was architected by Dhruv Mittal, who led the development team in San Francisco. CloudEngine integrates with Neo4j to build network dependency graphs, preventing routing circularity.",
+   "Knowledge Graph Venture Overview": "Knowledge Graph Labs was established in 2022 to build developer workflow tools. The venture is backed by TechCapital Partners, who led a $10 million Series A round. Their core product is CodeSync, a cloud synchronizer. CodeSync's team includes engineers previously at AWS and Microsoft, working under the technical leadership of Dhruv Mittal.",
+   "Project Orion Brief": "Project Orion is a data platform being built by Knowledge Graph Labs for Meridian Health. Priya Raman leads the Orion engineering team and reports to Dhruv Mittal. Amit Verma works on Orion's ingestion pipeline, which runs on Apache Kafka. The project is delivered from the company's Bengaluru office.",
+   "Meridian Health Partnership": "Meridian Health is a hospital network headquartered in Singapore. In 2024 Meridian Health signed a three-year partnership with Knowledge Graph Labs to modernise its patient records. The agreement covers Project Orion and a CodeSync licence for Meridian's internal developers.",
+   "Team Directory": "Priya Raman joined Knowledge Graph Labs in 2023 after working at Google. Amit Verma is a data engineer who previously built streaming systems at Flipkart. Both are based in Bengaluru. Sara Lee manages partnerships at TechCapital Partners and sits on the Knowledge Graph Labs board."
+  }
+ },
+ "answers": {
+  "which investor backs knowledge graph labs and who sits on its board": {
+   "question": "Which investor backs Knowledge Graph Labs and who sits on its board?",
+   "answer": "TechCapital Partners backs Knowledge Graph Labs, and Sara Lee sits on its board [8][14].",
+   "sources": [
+    {
+     "n": 8,
+     "entity": "TechCapital Partners",
+     "type": "ORGANIZATION",
+     "document": "Knowledge Graph Venture Overview, Team Directory",
+     "evidence": "[Knowledge Graph Venture Overview] ...The venture is backed by TechCapital Partners, who led a $10 million Series A round.\n\n[Team Directory] ...Sara Lee manages partnerships at TechCapital Partners and sits on the Knowledge Graph Labs board.",
+     "hops": 1,
+     "path": [
+      "Knowledge Graph Labs",
+      "TechCapital Partners"
+     ]
+    },
+    {
+     "n": 14,
+     "entity": "Sara Lee",
+     "type": "PERSON",
+     "document": "Team Directory",
+     "evidence": "...Sara Lee manages partnerships at TechCapital Partners and sits on the Knowledge Graph Labs board.",
+     "hops": 2,
+     "path": [
+      "Knowledge Graph Labs",
+      "TechCapital Partners",
+      "Sara Lee"
+     ]
+    }
+   ],
+   "invalidCitations": [],
+   "trace": [
+    "🔎 Searching the graph for: 'Which investor backs Knowledge Graph Labs and who sits on its board?'",
+    "🧩 Search terms: investor, back, knowledge, graph, labs, sits, board",
+    "📊 Matched 1 starting node(s): Knowledge Graph Labs",
+    "🔗 Traversing up to 2 hop(s) from: Knowledge Graph Labs",
+    "  → 1 hop(s): Knowledge Graph Labs ➔ Amit Verma",
+    "  → 1 hop(s): Knowledge Graph Labs ➔ Bengaluru office",
+    "  → 1 hop(s): Knowledge Graph Labs ➔ CloudEngine",
+    "  → 1 hop(s): Knowledge Graph Labs ➔ CodeSync",
+    "  → 1 hop(s): Knowledge Graph Labs ➔ Meridian Health",
+    "  → 1 hop(s): Knowledge Graph Labs ➔ Priya Raman",
+    "  → 1 hop(s): Knowledge Graph Labs ➔ TechCapital Partners",
+    "  → 2 hop(s): Knowledge Graph Labs ➔ Amit Verma ➔ Bengaluru",
+    "  → 2 hop(s): Knowledge Graph Labs ➔ CloudEngine ➔ Dhruv Mittal",
+    "  → 2 hop(s): Knowledge Graph Labs ➔ Amit Verma ➔ Flipkart",
+    "  → 2 hop(s): Knowledge Graph Labs ➔ CloudEngine ➔ Neo4j",
+    "  → 2 hop(s): Knowledge Graph Labs ➔ Meridian Health ➔ Project Orion",
+    "  → 2 hop(s): Knowledge Graph Labs ➔ TechCapital Partners ➔ Sara Lee",
+    "📝 Compiled context from 14 graph node(s)",
+    "✅ Generated answer with llama3.2",
+    "🔒 Matched 2 citation(s) to graph context"
+   ],
+   "searchTerms": [
+    "investor",
+    "back",
+    "knowledge",
+    "graph",
+    "labs",
+    "sits",
+    "board"
+   ],
+   "contextIds": [
+    "cec26e637e08",
+    "520cedd6e1a9",
+    "7590e7ac30cf",
+    "585f9eb81ab2",
+    "77c1a04116b6",
+    "41610ff83aee",
+    "a63918d01edf",
+    "e00974e37ec1",
+    "9aa8c9aa3273",
+    "0ebd3ce00ddd",
+    "5972793cc171",
+    "767ec6342382",
+    "c269daaf52f6",
+    "d879e0141ae4"
+   ],
+   "citedIds": [
+    "e00974e37ec1",
+    "d879e0141ae4"
+   ]
+  },
+  "what does the meridian health partnership cover": {
+   "question": "What does the Meridian Health partnership cover?",
+   "answer": "The Meridian Health partnership covers Project Orion and a CodeSync licence for Meridian's internal developers. [1][2]",
+   "sources": [
+    {
+     "n": 1,
+     "entity": "Meridian Health",
+     "type": "ORGANIZATION",
+     "document": "Project Orion Brief, Meridian Health Partnership",
+     "evidence": "[Project Orion Brief] Project Orion is a data platform being built by Knowledge Graph Labs for Meridian Health.\n\n[Meridian Health Partnership] Meridian Health is a hospital network headquartered in Singapore.",
+     "hops": 0,
+     "path": [
+      "Meridian Health"
+     ]
+    },
+    {
+     "n": 2,
+     "entity": "CodeSync",
+     "type": "PRODUCT",
+     "document": "Knowledge Graph Venture Overview, Meridian Health Partnership",
+     "evidence": "[Knowledge Graph Venture Overview] ...Their core product is CodeSync, a cloud synchronizer.\n\n[Meridian Health Partnership] ...The agreement covers Project Orion and a CodeSync licence for Meridian's internal developers.",
+     "hops": 1,
+     "path": [
+      "Meridian Health",
+      "CodeSync"
+     ]
+    }
+   ],
+   "invalidCitations": [],
+   "trace": [
+    "🔎 Searching the graph for: 'What does the Meridian Health partnership cover?'",
+    "🧩 Search terms: meridian, health, partnership, cover",
+    "📊 Matched 1 starting node(s): Meridian Health",
+    "🔗 Traversing up to 2 hop(s) from: Meridian Health",
+    "  → 1 hop(s): Meridian Health ➔ CodeSync",
+    "  → 1 hop(s): Meridian Health ➔ Knowledge Graph Labs",
+    "  → 1 hop(s): Meridian Health ➔ Project Orion",
+    "  → 2 hop(s): Meridian Health ➔ Knowledge Graph Labs ➔ Amit Verma",
+    "  → 2 hop(s): Meridian Health ➔ Knowledge Graph Labs ➔ Bengaluru office",
+    "  → 2 hop(s): Meridian Health ➔ Knowledge Graph Labs ➔ CloudEngine",
+    "  → 2 hop(s): Meridian Health ➔ CodeSync ➔ Dhruv Mittal",
+    "  → 2 hop(s): Meridian Health ➔ Knowledge Graph Labs ➔ Priya Raman",
+    "  → 2 hop(s): Meridian Health ➔ Knowledge Graph Labs ➔ TechCapital Partners",
+    "📝 Compiled context from 10 graph node(s)",
+    "✅ Generated answer with llama3.2",
+    "🔒 Matched 2 citation(s) to graph context"
+   ],
+   "searchTerms": [
+    "meridian",
+    "health",
+    "partnership",
+    "cover"
+   ],
+   "contextIds": [
+    "41610ff83aee",
+    "77c1a04116b6",
+    "cec26e637e08",
+    "c269daaf52f6",
+    "520cedd6e1a9",
+    "7590e7ac30cf",
+    "585f9eb81ab2",
+    "0ebd3ce00ddd",
+    "a63918d01edf",
+    "e00974e37ec1"
+   ],
+   "citedIds": [
+    "41610ff83aee",
+    "77c1a04116b6"
+   ]
+  }
+ }
+}

@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GraphRAG Knowledge Assistant · Dhruv Mittal</title>
+<meta name="description" content="Knowledge-graph RAG: extract entities with a local LLM, store them in a graph, and answer questions by multi-hop traversal with validated citations.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><path d='M21 4a12 12 0 1 0 7 21A10 10 0 0 1 21 4z' fill='%23a5b4fc'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Instrument+Serif:ital@1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand">
+      <svg viewBox="0 0 32 32" class="moon-mark" aria-hidden="true"><path d="M21 4a12 12 0 1 0 7 21A10 10 0 0 1 21 4z"/></svg>
+      <div><b>GraphRAG</b><span>Knowledge Assistant</span></div>
+    </div>
+    <nav class="nav" id="nav">
+      <button data-view="dashboard" class="on"><i class="ico">⌂</i>Dashboard</button>
+      <button data-view="chat"><i class="ico">◌</i>Chat Assistant</button>
+      <button data-view="documents"><i class="ico">▤</i>Documents</button>
+      <button data-view="graph"><i class="ico">⋔</i>Knowledge Graph</button>
+      <button data-view="settings"><i class="ico">⚙</i>Settings</button>
+    </nav>
+    <div class="status-box">
+      <h4>System status</h4>
+      <div class="st-row"><span>LLM (Ollama)</span><em id="st-llm">…</em></div>
+      <div class="st-row"><span>Graph store</span><em id="st-store">…</em></div>
+      <div class="st-row"><span>API server</span><em id="st-api">…</em></div>
+    </div>
+    <div class="moonscape" aria-hidden="true"><div class="moon"></div><div class="ridge r1"></div><div class="ridge r2"></div></div>
+  </aside>
+
+  <main class="main">
+    <header class="top">
+      <div>
+        <h1>GraphRAG <em>Knowledge Assistant</em></h1>
+        <p>Query your documents through a knowledge graph and a local LLM, with every citation checked.</p>
+      </div>
+      <div class="top-actions">
+        <label class="search"><span>⌕</span><input id="global-search" placeholder="Search entities, documents…" autocomplete="off"><kbd>/</kbd></label>
+        <button class="btn primary" id="open-upload">＋ Add document</button>
+        <a class="avatar" href="https://github.com/Dhruv-ux-dev/GraphRAG-Knowledge-Assistant" target="_blank" rel="noopener" title="Source on GitHub">DM</a>
+      </div>
+    </header>
+
+    <div class="demo-banner" id="demo-banner" hidden>
+      <b>Static demo.</b> This is a snapshot of a real run (<span id="demo-model">llama3.2</span>, in-memory graph). Ask one of the sample questions, or
+      <a href="https://github.com/Dhruv-ux-dev/GraphRAG-Knowledge-Assistant#run-the-web-ui" target="_blank" rel="noopener">run it locally</a> for live ingestion and any question.
+    </div>
+
+    <section class="stats" id="stats">
+      <div class="stat"><div class="s-ico">▤</div><div><b id="s-docs">–</b><span>Documents</span></div></div>
+      <div class="stat"><div class="s-ico">◈</div><div><b id="s-ents">–</b><span>Entities</span></div><small id="s-ents-sub"></small></div>
+      <div class="stat"><div class="s-ico">⋔</div><div><b id="s-rels">–</b><span>Relationships</span></div><small id="s-rels-sub"></small></div>
+      <div class="stat"><div class="s-ico">✓</div><div><b id="s-cite">–</b><span>Citation validity</span></div><small id="s-cite-sub"></small></div>
+    </section>
+
+    <section class="grid" id="grid">
+      <!-- Documents -->
+      <article class="panel" id="p-documents">
+        <div class="p-head"><h2>Document library</h2><button class="icon-btn" id="open-upload-2" title="Add document">＋</button></div>
+        <label class="search small"><span>⌕</span><input id="doc-search" placeholder="Search documents…"></label>
+        <ul class="docs" id="doc-list"></ul>
+        <div class="indexed" id="indexed"><span class="tick">✓</span><div><b>Ingested &amp; indexed</b><p id="indexed-text">–</p></div></div>
+      </article>
+
+      <!-- Graph -->
+      <article class="panel" id="p-graph">
+        <div class="p-head"><h2>Knowledge graph</h2>
+          <div class="tabs" id="graph-tabs"><button data-t="graph" class="on">Graph</button><button data-t="entities">Entities</button><button data-t="relationships">Relationships</button></div>
+        </div>
+        <div class="graph-wrap" id="graph-view">
+          <svg id="graph-svg"></svg>
+          <div class="graph-empty" id="graph-empty" hidden>No entities yet. Add a document to build the graph.</div>
+          <div class="node-card" id="node-card" hidden></div>
+          <div class="g-tools"><button id="z-in" title="Zoom in">＋</button><button id="z-out" title="Zoom out">−</button><button id="z-fit" title="Fit">⤢</button></div>
+          <div class="g-legend" id="g-legend"></div>
+        </div>
+        <div class="table-wrap" id="entities-view" hidden><table><thead><tr><th>Entity</th><th>Type</th><th>Summary</th><th>Docs</th></tr></thead><tbody id="ent-body"></tbody></table></div>
+        <div class="table-wrap" id="relationships-view" hidden><table><thead><tr><th>Source</th><th>Relationship</th><th>Target</th><th>Context</th></tr></thead><tbody id="rel-body"></tbody></table></div>
+      </article>
+
+      <!-- Chat -->
+      <article class="panel" id="p-chat">
+        <div class="p-head"><h2>Chat assistant</h2><button class="btn ghost sm" id="new-chat">New chat</button></div>
+        <div class="chat" id="chat">
+          <div class="welcome" id="welcome">
+            <p>Ask about people, organizations and projects in your documents. Answers cite the graph entries they rely on, and each citation is checked.</p>
+            <div class="chips" id="samples"></div>
+          </div>
+        </div>
+        <form class="ask" id="ask-form">
+          <input id="ask-input" placeholder="Ask a question about your documents…" autocomplete="off">
+          <button class="send" title="Ask">➤</button>
+        </form>
+      </article>
+
+      <!-- Settings -->
+      <article class="panel" id="p-settings" hidden>
+        <div class="p-head"><h2>Settings</h2></div>
+        <div class="settings">
+          <label>Traversal depth <output id="depth-out">2</output> hop(s)
+            <input type="range" id="depth" min="1" max="3" value="2"></label>
+          <div class="kv"><span>Mode</span><b id="set-mode">–</b></div>
+          <div class="kv"><span>Model</span><b id="set-model">–</b></div>
+          <div class="kv"><span>Graph store</span><b id="set-store">–</b></div>
+          <button class="btn danger" id="clear-graph">Clear graph</button>
+          <p class="muted">Connection details (Neo4j URI, credentials, Ollama host) are read from environment variables on the server and never shown in the browser.</p>
+        </div>
+      </article>
+    </section>
+    <footer class="foot">Built by Dhruv Mittal · Python · FastAPI · Neo4j · Ollama · <a href="https://github.com/Dhruv-ux-dev/GraphRAG-Knowledge-Assistant" target="_blank" rel="noopener">Source</a></footer>
+  </main>
+</div>
+
+<dialog id="upload">
+  <form method="dialog" id="upload-form">
+    <h3>Add a document</h3>
+    <p class="muted">The LLM extracts entities and relationships and merges them into the graph.</p>
+    <label>Start from a sample<select id="tpl"><option value="">— Write your own —</option></select></label>
+    <label>Name<input id="up-name" required maxlength="120" placeholder="e.g. Q3 Board Notes"></label>
+    <label>Text<textarea id="up-text" required minlength="20" rows="8" placeholder="Paste text, or load a .txt / .md file"></textarea></label>
+    <label class="file">Load file<input type="file" id="up-file" accept=".txt,.md,text/plain,text/markdown"></label>
+    <p class="err" id="up-err"></p>
+    <div class="row"><button type="button" class="btn ghost" id="up-cancel">Cancel</button><button class="btn primary" id="up-go">Extract &amp; ingest</button></div>
+  </form>
+</dialog>
+
+<div class="toast" id="toast" hidden></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

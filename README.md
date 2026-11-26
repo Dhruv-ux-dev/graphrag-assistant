@@ -1,8 +1,8 @@
 # GraphRAG Knowledge Assistant
 
-**Developed by Dhruv Mittal** · [GitHub profile](https://github.com/Dhruv-ux-dev)
+**Developed by Dhruv Mittal** · [GitHub profile](https://github.com/Dhruv-ux-dev) · **[Live demo](https://dhruv-ux-dev.github.io/graphrag-assistant/)**
 
-A Streamlit application for knowledge-graph-based retrieval-augmented generation (GraphRAG). It extracts entities and relationships from text with a local Ollama model, stores them in Neo4j, traverses connected entities for multi-hop context, and answers questions with inline citations that trace back to the source passages.
+A knowledge-graph-based retrieval-augmented generation (GraphRAG). It extracts entities and relationships from text with a local Ollama model, stores them in Neo4j, traverses connected entities for multi-hop context, and answers questions with inline citations that trace back to the source passages.
 
 ## Features
 
@@ -12,7 +12,9 @@ A Streamlit application for knowledge-graph-based retrieval-augmented generation
 - **Multi-hop retrieval** that expands from matched entities across connected nodes (configurable 1–3 hops).
 - **Source attribution** mapping each `[N]` citation in the answer to its document, evidence passage and graph path.
 - **Execution trace** showing the search terms, matched nodes, traversal paths and the exact context sent to the model.
+- **Web UI** (FastAPI + D3) with an interactive knowledge graph, document library, chat with clickable citations and the retrieval trace.
 - **Streamlit dashboard** for ingestion, querying and database statistics.
+- **Pluggable graph store:** Neo4j, or an in-memory graph when no Neo4j server is available.
 - **Docker Compose setup** for the app, Neo4j and Ollama, with health checks so the app starts only when its dependencies are ready.
 
 ## How it works
@@ -98,6 +100,25 @@ Graph data is stored in the `neo4j_data` Docker volume. Keep this volume if you 
    streamlit run app.py
    ```
 
+## Run the web UI
+
+The web UI talks to a small FastAPI server (`api.py`) that reuses the same extraction, retrieval and
+citation-checking code as the Streamlit app.
+
+```bash
+pip install -r requirements.txt
+ollama pull llama3.2
+uvicorn api:app --port 8000        # then open http://localhost:8000
+```
+
+Without `NEO4J_URI` the server keeps the graph in memory (`memory_store.py`), so only Ollama is
+needed. Set `NEO4J_URI`, `NEO4J_USER` and `NEO4J_PASSWORD` to use Neo4j instead.
+
+The [live demo](https://dhruv-ux-dev.github.io/graphrag-assistant/) is the same UI served as static
+files. With no server behind it, it loads `web/demo-data.json`, a snapshot of a real run with
+`llama3.2` on the sample documents, and can replay the sample questions. Regenerate it with
+`python export_demo.py`.
+
 ## How to use
 
 1. Open the **Document Ingestion** tab.
@@ -122,10 +143,16 @@ The unit tests cover extraction validation, text normalization, keyword extracti
 ```text
 graphrag-assistant/
 ├── app.py                  # Streamlit UI, extraction, graph store, retrieval and answering
+├── api.py                  # FastAPI server for the web UI
+├── memory_store.py         # In-memory graph store (no Neo4j needed)
+├── export_demo.py          # Builds web/demo-data.json for the static demo
+├── web/                    # Web UI (HTML, CSS, JS with D3)
 ├── .github/workflows/
-│   └── tests.yml           # CI: runs the test suite on every push
+│   ├── tests.yml           # CI: runs the test suite on every push
+│   └── pages.yml           # Deploys web/ to GitHub Pages
 ├── tests/
-│   └── test_app.py         # Unit tests (no services required)
+│   ├── test_app.py         # Unit tests (no services required)
+│   └── test_api.py         # In-memory store and API tests
 ├── requirements.txt
 ├── requirements-dev.txt
 ├── Dockerfile

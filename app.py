@@ -23,6 +23,9 @@ from ollama import Client as OllamaClient
 OLLAMA_ENDPOINT = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
 DEFAULT_MODEL = os.environ.get("OLLAMA_MODEL", "llama3.2")
 inference_client = OllamaClient(host=OLLAMA_ENDPOINT)
+# Set OLLAMA_THINK=false to skip the reasoning phase of "thinking" models such as qwen3
+_THINK = os.environ.get("OLLAMA_THINK", "").strip().lower()
+CHAT_EXTRA: Dict[str, Any] = {"think": _THINK in ("1", "true", "yes")} if _THINK else {}
 
 # Retrieval tuning
 MAX_ENTRY_NODES = 5          # Starting nodes taken from the question
@@ -383,6 +386,21 @@ class Neo4jGraphStore:
             )
             return [dict(record) for record in cursor]
 
+    def export_graph(self, limit: int = 500) -> Dict[str, List[Dict[str, Any]]]:
+        """Return nodes and relationships for visualisation (capped at `limit` each)."""
+        with self.db_driver.session() as db_session:
+            nodes = [dict(r) for r in db_session.run(
+                "MATCH (n:GraphNode) RETURN n.id AS id, n.name AS name, coalesce(n.category, 'CONCEPT') AS type, "
+                "coalesce(n.summary, '') AS summary, coalesce(n.documents, []) AS documents LIMIT $limit",
+                limit=limit,
+            )]
+            edges = [dict(r) for r in db_session.run(
+                "MATCH (a:GraphNode)-[r:LINKED_TO]->(b:GraphNode) RETURN a.id AS source, b.id AS target, "
+                "r.type AS type, coalesce(r.context, '') AS context, coalesce(r.documents, []) AS documents LIMIT $limit",
+                limit=limit,
+            )]
+        return {"nodes": nodes, "edges": edges}
+
 
 # ============================================================================
 # SECTION 5: LLM-POWERED ENTITY & RELATIONSHIP EXTRACTOR
@@ -491,6 +509,7 @@ def parse_graph_elements_via_llm(
             messages=[{"role": "user", "content": EXTRACTION_PROMPT.format(document=document_content.strip())}],
             format="json",
             options={"temperature": 0},
+            **CHAT_EXTRA,
         )
     except Exception as exc:
         raise ExtractionError(
@@ -639,6 +658,7 @@ def run_attributed_graph_rag(
             model=model_name,
             messages=[{"role": "user", "content": ANSWER_PROMPT.format(context=compiled_context, question=user_query)}],
             options={"temperature": 0.1},
+            **CHAT_EXTRA,
         )
         answer_text = response["message"]["content"]
     except Exception as error:
@@ -697,6 +717,22 @@ DEMO_DOCUMENTS = {
         "backed by TechCapital Partners, who led a $10 million Series A round. Their core product is "
         "CodeSync, a cloud synchronizer. CodeSync's team includes engineers previously at AWS and "
         "Microsoft, working under the technical leadership of Dhruv Mittal."
+    ),
+    "Project Orion Brief": (
+        "Project Orion is a data platform being built by Knowledge Graph Labs for Meridian Health. "
+        "Priya Raman leads the Orion engineering team and reports to Dhruv Mittal. Amit Verma works on "
+        "Orion's ingestion pipeline, which runs on Apache Kafka. The project is delivered from the "
+        "company's Bengaluru office."
+    ),
+    "Meridian Health Partnership": (
+        "Meridian Health is a hospital network headquartered in Singapore. In 2024 Meridian Health signed "
+        "a three-year partnership with Knowledge Graph Labs to modernise its patient records. The "
+        "agreement covers Project Orion and a CodeSync licence for Meridian's internal developers."
+    ),
+    "Team Directory": (
+        "Priya Raman joined Knowledge Graph Labs in 2023 after working at Google. Amit Verma is a data "
+        "engineer who previously built streaming systems at Flipkart. Both are based in Bengaluru. "
+        "Sara Lee manages partnerships at TechCapital Partners and sits on the Knowledge Graph Labs board."
     ),
 }
 
