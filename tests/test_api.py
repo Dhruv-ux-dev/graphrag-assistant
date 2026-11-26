@@ -164,4 +164,4 @@ def test_client_falls_back_when_model_overloaded(monkeypatch):
     client._http = httpx.Client(base_url="https://example.test/v1/", transport=httpx.MockTransport(handler))
     client.fallback_models = ["busy-model", "spare-model"]
     assert client.chat("busy-model", [{"role": "user", "content": "hi"}])["message"]["content"] == "ok"
-    assert calls == ["busy-model", "busy-model", "spare-model"]
+    assert calls == ["busy-model", "spare-model"]

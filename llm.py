@@ -38,7 +38,7 @@ class OpenAICompatClient:
              options: Optional[Dict[str, Any]] = None, **_: Any) -> Dict[str, Any]:
         last_error = ""
         for candidate in [model] + [m for m in self.fallback_models if m != model]:
-            for attempt in range(2):
+            for attempt in range(1):
                 body: Dict[str, Any] = {"model": candidate, "messages": messages}
                 if options and "temperature" in options:
                     body["temperature"] = options["temperature"]
@@ -57,7 +57,7 @@ class OpenAICompatClient:
                     break
                 if res.status_code not in RETRYABLE:
                     raise RuntimeError(last_error)
-                time.sleep(2 + 3 * attempt)
+                time.sleep(1)
         raise RuntimeError(last_error or f"{self.label} API request failed")
 
     def list(self) -> Dict[str, Any]:

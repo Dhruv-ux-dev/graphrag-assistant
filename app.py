@@ -35,7 +35,10 @@ if os.environ.get("GEMINI_API_KEY"):
     # Google retires model versions, so default to the newest Flash model the key can use
     DEFAULT_MODEL = os.environ.get("GEMINI_MODEL") or pick_latest_flash(inference_client, "gemini-2.5-flash")
     # When that model is overloaded, fall back to the other Flash models (newest first, lite last)
-    inference_client.fallback_models = flash_models(inference_client)[:4]
+    _flash = flash_models(inference_client)
+    _full = [m for m in _flash if not m.endswith("-lite")]
+    _lite = [m for m in _flash if m.endswith("-lite")]
+    inference_client.fallback_models = (_full[:1] + _lite[:2] + _full[1:3])
 elif os.environ.get("GROQ_API_KEY"):
     from llm import GROQ_BASE_URL, OpenAICompatClient
 
