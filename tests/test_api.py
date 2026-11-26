@@ -127,3 +127,20 @@ def test_ask_is_rate_limited(client, monkeypatch):
     api._hits.clear()
     assert client.post("/api/ask", json={"question": "Who architected CloudEngine?"}).status_code == 200
     assert client.post("/api/ask", json={"question": "Who architected CloudEngine?"}).status_code == 429
+
+
+def test_pick_latest_flash_prefers_newest_stable():
+    from llm import pick_latest_flash
+
+    class Lister:
+        def list(self):
+            ids = ["models/gemini-2.5-flash", "models/gemini-3.8-flash", "models/gemini-3.8-flash-lite",
+                   "models/gemini-3.10-pro", "models/gemini-3.1-flash"]
+            return {"models": [{"model": i} for i in ids]}
+
+    class Broken:
+        def list(self):
+            raise RuntimeError("offline")
+
+    assert pick_latest_flash(Lister(), "fallback") == "gemini-3.8-flash"
+    assert pick_latest_flash(Broken(), "fallback") == "fallback"

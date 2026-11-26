@@ -111,8 +111,8 @@ ollama pull llama3.2
 uvicorn api:app --port 8000        # then open http://localhost:8000
 ```
 
-To use a hosted model instead of Ollama, set `GEMINI_API_KEY` (optional `GEMINI_MODEL`, default
-`gemini-2.5-flash`) or `GROQ_API_KEY` (optional `GROQ_MODEL`, default `llama-3.3-70b-versatile`). The API server only needs `requirements-api.txt`.
+To use a hosted model instead of Ollama, set `GEMINI_API_KEY` (optional `GEMINI_MODEL`; by default the newest
+`gemini-X.Y-flash` model available to the key) or `GROQ_API_KEY` (optional `GROQ_MODEL`, default `llama-3.3-70b-versatile`). The API server only needs `requirements-api.txt`.
 
 Without `NEO4J_URI` the server keeps the graph in memory (`memory_store.py`), so only Ollama is
 needed. Set `NEO4J_URI`, `NEO4J_USER` and `NEO4J_PASSWORD` to use Neo4j instead.

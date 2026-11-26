@@ -42,3 +42,15 @@ class OpenAICompatClient:
         res = self._http.get("models")
         res.raise_for_status()
         return {"models": [{"model": m["id"]} for m in res.json().get("data", [])]}
+
+
+def pick_latest_flash(client: "OpenAICompatClient", fallback: str) -> str:
+    """Newest stable 'gemini-X.Y-flash' model the key can use, or `fallback` if the list is unavailable."""
+    import re
+    try:
+        ids = [m["model"].split("/")[-1] for m in client.list()["models"]]
+    except Exception:
+        return fallback
+    flash = [(tuple(int(x) for x in m.group(1).split(".")), i) for i in ids
+             if (m := re.fullmatch(r"gemini-(\d+(?:\.\d+)?)-flash", i))]
+    return max(flash)[1] if flash else fallback
