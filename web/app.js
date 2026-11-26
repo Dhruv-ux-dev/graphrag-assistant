@@ -14,8 +14,12 @@ const norm = (s) => String(s).toLowerCase().replace(/[^0-9a-z]+/g, ' ').trim();
 const state = { mode: null, demo: null, overview: null, depth: 2, highlight: null, docFilter: '', selectedDoc: null };
 
 // ---------------- data layer ----------------
+// Where the API lives: same origin by default, or a hosted server set in config.js
+const API_BASE = (window.GRAPHRAG_API || '').replace(/\/?$/, '/');
+const REMOTE_API = !!window.GRAPHRAG_API;
+
 async function api(path, opts = {}) {
-  const res = await fetch('api/' + path, { headers: { 'Content-Type': 'application/json' }, ...opts });
+  const res = await fetch((REMOTE_API ? API_BASE : '') + 'api/' + path, { headers: { 'Content-Type': 'application/json' }, ...opts });
   if (!res.ok) {
     let detail = res.statusText;
     try { const j = await res.json(); detail = typeof j.detail === 'string' ? j.detail : JSON.stringify(j.detail); } catch {}
@@ -24,27 +28,45 @@ async function api(path, opts = {}) {
   return res.json();
 }
 
-async function boot() {
-  try {
-    const status = await api('status');
-    state.mode = 'live';
-    setStatus(status);
-    await refresh();
-  } catch {
-    state.mode = 'demo';
-    const res = await fetch('demo-data.json');
-    state.demo = await res.json();
-    state.overview = state.demo.overview;
-    setStatus(null);
-    $('demo-banner').hidden = false;
-    $('demo-model').textContent = state.demo.meta.model;
-    for (const id of ['open-upload', 'open-upload-2', 'clear-graph']) {
-      $(id).disabled = true;
-      $(id).title = 'Available when running locally';
-    }
-    renderAll();
-  }
+async function goLive(status) {
+  state.mode = 'live';
+  setStatus(status);
+  $('demo-banner').hidden = true;
+  for (const id of ['open-upload', 'open-upload-2', 'clear-graph']) { $(id).disabled = false; $(id).title = ''; }
+  await refresh();
   renderSamples();
+}
+
+async function loadDemo(waking) {
+  state.mode = 'demo';
+  state.demo = await (await fetch('demo-data.json')).json();
+  state.overview = state.demo.overview;
+  setStatus(null, waking);
+  $('demo-banner').hidden = false;
+  $('demo-model').textContent = state.demo.meta.model;
+  $('banner-waking').hidden = !waking;
+  $('banner-static').hidden = waking;
+  for (const id of ['open-upload', 'open-upload-2', 'clear-graph']) {
+    $(id).disabled = true;
+    $(id).title = waking ? 'The live server is starting…' : 'Available when running locally';
+  }
+  renderAll();
+  renderSamples();
+}
+
+async function boot() {
+  if (!REMOTE_API) {
+    try { return await goLive(await api('status')); } catch { return loadDemo(false); }
+  }
+  // Hosted: show the snapshot at once, then switch to live when the (possibly sleeping) server answers
+  await loadDemo(true);
+  const deadline = Date.now() + 150000;
+  while (Date.now() < deadline) {
+    try { return await goLive(await api('status')); } catch { await new Promise((r) => setTimeout(r, 5000)); }
+  }
+  $('banner-waking').hidden = true;
+  $('banner-static').hidden = false;
+  setStatus(null, false);
 }
 
 async function refresh() {
@@ -52,17 +74,19 @@ async function refresh() {
   renderAll();
 }
 
-function setStatus(status) {
+function setStatus(status, waking) {
   const set = (id, text, cls) => { $(id).textContent = text; $(id).className = cls; };
   if (!status) {
     set('st-llm', 'Snapshot', 'warn');
     set('st-store', 'In-memory', 'warn');
-    set('st-api', 'Static demo', 'warn');
+    set('st-api', waking ? 'Waking up…' : 'Static demo', 'warn');
     $('set-mode').textContent = 'Static demo (snapshot)';
     $('set-model').textContent = state.demo.meta.model;
     $('set-store').textContent = 'In-memory (snapshot)';
     return;
   }
+  const llmName = status.provider === 'groq' ? 'Groq' : 'Ollama';
+  $('st-llm').previousElementSibling.textContent = `LLM (${llmName})`;
   set('st-llm', status.ollama ? 'Running' : 'Offline', status.ollama ? 'ok' : 'off');
   set('st-store', status.store === 'neo4j' ? 'Neo4j' : 'In-memory', 'ok');
   set('st-api', 'Healthy', 'ok');
@@ -353,9 +377,9 @@ $('upload-form').addEventListener('submit', async (e) => {
 });
 
 $('clear-graph').onclick = async () => {
-  if (!confirm('Delete every entity and relationship in the graph?')) return;
+  if (!confirm('Reset the graph? Documents you added will be removed.')) return;
   await api('graph', { method: 'DELETE' });
-  toast('Graph cleared');
+  toast('Graph reset');
   await refresh();
 };
 

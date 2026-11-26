@@ -110,3 +110,20 @@ def test_api_ask_validates_citations(client):
 
 def test_api_rejects_short_documents(client):
     assert client.post("/api/documents", json={"name": "x", "text": "too short"}).status_code == 422
+
+
+def test_reset_reseeds_sample_graph(client):
+    import api
+    r = client.delete("/api/graph")
+    assert r.status_code == 200
+    stats = client.get("/api/overview").json()["stats"]
+    if (api.WEB_DIR / "demo-data.json").is_file():
+        assert stats["entities"] > 0 and stats["documents"] == len(app.DEMO_DOCUMENTS)
+
+
+def test_ask_is_rate_limited(client, monkeypatch):
+    import api
+    monkeypatch.setitem(api.RATE_LIMITS, "ask", 1)
+    api._hits.clear()
+    assert client.post("/api/ask", json={"question": "Who architected CloudEngine?"}).status_code == 200
+    assert client.post("/api/ask", json={"question": "Who architected CloudEngine?"}).status_code == 429

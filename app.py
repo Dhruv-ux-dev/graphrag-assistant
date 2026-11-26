@@ -15,14 +15,29 @@ import re
 from dataclasses import dataclass, field
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
-import streamlit as st
+try:
+    import streamlit as st  # only needed for the Streamlit dashboard
+except ImportError:  # the API server runs without it
+    st = None
 from neo4j import GraphDatabase
 from ollama import Client as OllamaClient
 
 # Connection endpoint and default model for the local Ollama inference engine
 OLLAMA_ENDPOINT = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
-DEFAULT_MODEL = os.environ.get("OLLAMA_MODEL", "llama3.2")
-inference_client = OllamaClient(host=OLLAMA_ENDPOINT)
+
+# LLM provider: Groq's hosted API when GROQ_API_KEY is set, otherwise local Ollama
+if os.environ.get("GROQ_API_KEY"):
+    from llm import GroqClient
+
+    LLM_PROVIDER = "groq"
+    DEFAULT_MODEL = os.environ.get("GROQ_MODEL", "llama-3.3-70b-versatile")
+    LLM_ENDPOINT = "Groq API"
+    inference_client = GroqClient(os.environ["GROQ_API_KEY"])
+else:
+    LLM_PROVIDER = "ollama"
+    DEFAULT_MODEL = os.environ.get("OLLAMA_MODEL", "llama3.2")
+    LLM_ENDPOINT = OLLAMA_ENDPOINT
+    inference_client = OllamaClient(host=OLLAMA_ENDPOINT)
 # Set OLLAMA_THINK=false to skip the reasoning phase of "thinking" models such as qwen3
 _THINK = os.environ.get("OLLAMA_THINK", "").strip().lower()
 CHAT_EXTRA: Dict[str, Any] = {"think": _THINK in ("1", "true", "yes")} if _THINK else {}
@@ -513,7 +528,7 @@ def parse_graph_elements_via_llm(
         )
     except Exception as exc:
         raise ExtractionError(
-            f"Could not reach Ollama at {OLLAMA_ENDPOINT} with model '{model_name}': {exc}"
+            f"Could not reach the LLM ({LLM_ENDPOINT}) with model '{model_name}': {exc}"
         ) from exc
 
     raw = completion["message"]["content"]

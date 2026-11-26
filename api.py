@@ -4,22 +4,27 @@ REST API for the GraphRAG Knowledge Assistant web UI.
 Wraps the same extraction, retrieval and citation-checking code as the Streamlit
 app (app.py) and serves the web UI from ./web.
 
-Graph store: Neo4j when NEO4J_URI is set, otherwise an in-memory graph.
-LLM: Ollama at OLLAMA_HOST with OLLAMA_MODEL.
+Graph store: Neo4j when NEO4J_URI is set, otherwise an in-memory graph that is
+seeded with the sample documents from web/demo-data.json.
+LLM: Groq when GROQ_API_KEY is set, otherwise Ollama at OLLAMA_HOST.
 
 Run:  uvicorn api:app --port 8000   then open http://localhost:8000
 
 Developed by Dhruv Mittal.
 """
 
+import json
 import os
 import re
 import threading
+import time
+from collections import defaultdict, deque
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
@@ -27,7 +32,8 @@ from app import (
     DEFAULT_HOP_DEPTH,
     DEFAULT_MODEL,
     DEMO_DOCUMENTS,
-    OLLAMA_ENDPOINT,
+    LLM_ENDPOINT,
+    LLM_PROVIDER,
     ExtractionError,
     Neo4jGraphStore,
     extract_search_terms,
@@ -45,6 +51,10 @@ SAMPLE_QUESTIONS = [
 ]
 
 NEO4J_URI = os.environ.get("NEO4J_URI", "")
+ALLOWED_ORIGINS = [o.strip() for o in os.environ.get("ALLOWED_ORIGINS", "").split(",") if o.strip()]
+MAX_NODES = int(os.environ.get("MAX_GRAPH_NODES", "400"))
+# Requests per client per hour for the endpoints that call the LLM
+RATE_LIMITS = {"ask": int(os.environ.get("ASK_PER_HOUR", "30")), "ingest": int(os.environ.get("INGEST_PER_HOUR", "10"))}
 
 
 def _open_store():
@@ -61,6 +71,35 @@ documents: Dict[str, Dict[str, Any]] = {}
 citation_stats = {"cited": 0, "valid": 0}
 
 app = FastAPI(title="GraphRAG Knowledge Assistant API")
+if ALLOWED_ORIGINS:
+    app.add_middleware(CORSMiddleware, allow_origins=ALLOWED_ORIGINS, allow_methods=["GET", "POST", "DELETE"],
+                       allow_headers=["Content-Type"])
+
+_hits: Dict[str, deque] = defaultdict(deque)
+
+
+def _rate_limit(request: Request, bucket: str) -> None:
+    forwarded = request.headers.get("x-forwarded-for", "")
+    client = forwarded.split(",")[0].strip() or (request.client.host if request.client else "unknown")
+    q = _hits[f"{bucket}:{client}"]
+    now = time.time()
+    while q and now - q[0] > 3600:
+        q.popleft()
+    if len(q) >= RATE_LIMITS[bucket]:
+        raise HTTPException(status_code=429, detail="Hourly limit reached for this demo. Please try again later.")
+    q.append(now)
+
+
+def _seed_from_snapshot() -> None:
+    """Start the in-memory graph with the sample documents, without calling the LLM."""
+    path = Path(__file__).parent / "web" / "demo-data.json"
+    if STORE_KIND != "memory" or not path.is_file():
+        return
+    overview = json.loads(path.read_text())["overview"]
+    texts = {d["name"]: d["text"] for d in overview["documents"]}
+    store.load_graph(overview["graph"], texts)
+    for name, text in texts.items():
+        documents[name] = {"text": text, "ingestedAt": None}
 
 
 class DocumentIn(BaseModel):
@@ -125,7 +164,8 @@ def status():
         "mode": "live",
         "store": STORE_KIND,
         "model": DEFAULT_MODEL,
-        "ollamaEndpoint": OLLAMA_ENDPOINT,
+        "provider": LLM_PROVIDER,
+        "llmEndpoint": LLM_ENDPOINT,
         "ollama": _ollama_ok(),
         "graphStore": True,
     }
@@ -140,7 +180,10 @@ def overview():
 
 
 @app.post("/api/documents")
-def ingest(doc: DocumentIn):
+def ingest(doc: DocumentIn, request: Request):
+    _rate_limit(request, "ingest")
+    if store.graph_size()[0] >= MAX_NODES:
+        raise HTTPException(status_code=409, detail="The demo graph is full. Clear it from Settings to add more documents.")
     name = " ".join(doc.name.split())
     try:
         nodes, edges = parse_graph_elements_via_llm(doc.text, name)
@@ -155,16 +198,20 @@ def ingest(doc: DocumentIn):
 
 
 @app.delete("/api/graph")
-def clear_graph():
+def clear_graph(request: Request):
+    """Reset the graph: back to the sample documents in memory mode, empty with Neo4j."""
+    _rate_limit(request, "ingest")
     with lock:
         store.reset_database()
-    documents.clear()
-    citation_stats.update(cited=0, valid=0)
+        documents.clear()
+        citation_stats.update(cited=0, valid=0)
+        _seed_from_snapshot()
     return {"ok": True}
 
 
 @app.post("/api/ask")
-def ask(q: QuestionIn):
+def ask(q: QuestionIn, request: Request):
+    _rate_limit(request, "ask")
     with lock:
         result = run_attributed_graph_rag(q.question, store, DEFAULT_MODEL, q.depth)
     cited = sorted({int(n) for n in re.findall(r"\[(\d+)\]", result.content)})
@@ -197,6 +244,8 @@ def answer_payload(question: str, result) -> Dict[str, Any]:
         "citedIds": [entries[s["n"] - 1]["id"] for s in sources],
     }
 
+
+_seed_from_snapshot()
 
 WEB_DIR = Path(__file__).parent / "web"
 if WEB_DIR.is_dir():

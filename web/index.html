@@ -47,8 +47,9 @@
     </header>
 
     <div class="demo-banner" id="demo-banner" hidden>
-      <b>Static demo.</b> This is a snapshot of a real run (<span id="demo-model">llama3.2</span>, in-memory graph). Ask one of the sample questions, or
-      <a href="https://github.com/Dhruv-ux-dev/GraphRAG-Knowledge-Assistant#run-the-web-ui" target="_blank" rel="noopener">run it locally</a> for live ingestion and any question.
+      <span id="banner-waking"><b>Waking up the live server…</b> The free host sleeps when idle, so this can take up to a minute. Meanwhile you are seeing a snapshot of a real run (<span id="demo-model">llama3.2</span>).</span>
+      <span id="banner-static" hidden><b>Static demo.</b> The live server is unavailable, so this is a snapshot of a real run. Ask one of the sample questions, or
+      <a href="https://github.com/Dhruv-ux-dev/graphrag-assistant#run-the-web-ui" target="_blank" rel="noopener">run it locally</a> for live ingestion and any question.</span>
     </div>
 
     <section class="stats" id="stats">
@@ -107,7 +108,7 @@
           <div class="kv"><span>Mode</span><b id="set-mode">–</b></div>
           <div class="kv"><span>Model</span><b id="set-model">–</b></div>
           <div class="kv"><span>Graph store</span><b id="set-store">–</b></div>
-          <button class="btn danger" id="clear-graph">Clear graph</button>
+          <button class="btn danger" id="clear-graph">Reset graph</button>
           <p class="muted">Connection details (Neo4j URI, credentials, Ollama host) are read from environment variables on the server and never shown in the browser.</p>
         </div>
       </article>
@@ -132,6 +133,7 @@
 <div class="toast" id="toast" hidden></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script src="config.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

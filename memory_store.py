@@ -166,6 +166,21 @@ class MemoryGraphStore:
         results.sort(key=lambda r: (r["hops"], r["name"]))
         return results[:limit]
 
+    def load_graph(self, graph: Dict[str, List[Dict[str, Any]]], texts: Dict[str, str]) -> None:
+        """Load nodes and edges exported by export_graph(); snippets are rebuilt from the document texts."""
+        for n in graph["nodes"]:
+            self.nodes[n["id"]] = {
+                "id": n["id"], "name": n["name"], "key": normalize_text(n["name"]),
+                "category": n["type"], "summary": n.get("summary", ""),
+                "documents": list(n["documents"]),
+                "snippets": [find_snippet(texts.get(d, ""), n["name"]) for d in n["documents"]],
+            }
+        for e in graph["edges"]:
+            self.edges[(e["source"], e["target"], e["type"])] = {
+                "source": e["source"], "target": e["target"], "type": e["type"],
+                "context": e.get("context", ""), "documents": list(e["documents"]),
+            }
+
     def export_graph(self) -> Dict[str, List[Dict[str, Any]]]:
         """All nodes and edges, for the graph view."""
         return {

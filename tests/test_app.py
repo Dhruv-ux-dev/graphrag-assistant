@@ -140,13 +140,13 @@ def test_extraction_rejects_non_object(llm):
         app.parse_graph_elements_via_llm(DOC, "Spec")
 
 
-def test_extraction_reports_unreachable_ollama(monkeypatch):
+def test_extraction_reports_unreachable_llm(monkeypatch):
     class Down:
         def chat(self, **kwargs):
             raise ConnectionError("connection refused")
 
     monkeypatch.setattr(app, "inference_client", Down())
-    with pytest.raises(app.ExtractionError, match="Could not reach Ollama"):
+    with pytest.raises(app.ExtractionError, match="Could not reach the LLM"):
         app.parse_graph_elements_via_llm(DOC, "Spec")
 
 
